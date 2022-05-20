@@ -6,7 +6,7 @@ import csv
 import collections
 import pandas as pd
 from functools import cmp_to_key
-import joblib
+from sklearn.externals import joblib
 
 # api token: 5290163489:AAGat_iZ-2QdzvSF-CtqykvsQVMZAKsMqcI
 # vpn_connect: windscribe connect
