@@ -6,7 +6,7 @@ import csv
 import collections
 import pandas as pd
 from functools import cmp_to_key
-from sklearn.externals import joblib
+import joblib
 
 # api token: 5290163489:AAGat_iZ-2QdzvSF-CtqykvsQVMZAKsMqcI
 # vpn_connect: windscribe connect
@@ -173,7 +173,7 @@ def preprocessing(data):
     return processing_data
 
 
-def get_weather(now):
+def get_weather(now, preprocessing_flag=True):
     CSV_URL1 = 'http://api.worldweatheronline.com/premium/v1/past-weather.ashx?q=Moscow&date='
     time1 = str(now.year) + '-' + str(now.month) + '-' + str(now.day-1)
     CSV_URL2 = '&enddate='
@@ -229,6 +229,9 @@ def get_weather(now):
             'FeelsLikeF']
     data_now = pd.read_csv('weather_now.csv', names=cols)
     data_now = data_now.dropna()
+    if not preprocessing_flag:
+        return data_now
+
     day = preprocessing(data_now[['time', 'tempC', 'weatherDesc']].values)
     return day
 
@@ -398,8 +401,11 @@ def send_text2(message):
 
 def ML_predict(message):
     now = datetime.datetime.now()
+    data = get_weather(now, preprocessing_flag=False)
+    
+    print(data.iloc[13]['tempC'])
     _joblib = joblib.load('method.pkl')
-    res = round(float(_joblib.predict([[now.day, now.month, now.year]])), 1)
+    res = round(float(_joblib.predict([[data.iloc[13]['tempC'], data.iloc[13]['windspeedKmph'], data.iloc[13]['winddirdegree'], data.iloc[13]['weatherCode'], data.iloc[13]['humidity'], data.iloc[13]['pressureInches'], data.iloc[13]['pressureInches'], now.day, now.month, now.year, 1, 0]])), 1)
     bot.send_message(message.chat.id, 'Наиболее вероятно, что завтра температура будет около ' + str(res) + ' градусов.')
     bot.send_message(message.chat.id, 'Для получения нового прогноза введите /start')
 
